@@ -1,0 +1,28 @@
+# Write your query or mutation here
+query post($filters: PostFiltersInput, $pagination: PaginationArg) {
+  posts(filters: $filters, pagination: $pagination) {
+    meta {
+      pagination {
+        total
+        page
+        pageSize
+        pageCount
+      }
+    }
+    data {
+      id
+      attributes {
+        description
+        title
+        images {
+          data {
+            attributes {
+              url
+            }
+          }
+        }
+        createdAt
+      }
+    }
+  }
+}

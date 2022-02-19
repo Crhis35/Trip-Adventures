@@ -1,0 +1,4 @@
+export default {
+  unknown: 'Unknown error',
+  popup_closed_by_user: 'Popup was closed by user',
+};

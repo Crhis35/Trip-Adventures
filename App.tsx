@@ -1,71 +1,71 @@
-import React from "react";
-import {
-  Text,
-  Link,
-  HStack,
-  Center,
-  Heading,
-  Switch,
-  useColorMode,
-  NativeBaseProvider,
-  extendTheme,
-  VStack,
-  Code,
-} from "native-base";
-import NativeBaseIcon from "./components/NativeBaseIcon";
+import React, { useState } from 'react';
 
-// Define the config
-const config = {
-  useSystemColorMode: false,
-  initialColorMode: "dark",
-};
+import i18next from 'i18next';
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
 
-// extend the theme
-export const theme = extendTheme({ config });
+import { CourierPrime_400Regular } from '@expo-google-fonts/courier-prime';
+import { I18nextProvider } from 'react-i18next';
+import { Image } from 'react-native';
+import { Asset } from 'expo-asset';
+
+import { config as i18nextConfig } from './src/translations';
+
+import AppThemeProvider from './src/theme';
+import MainNavigation from './src/navigations/index';
+import QueryProvider from './src/react-query/index';
+
+i18next.init(i18nextConfig);
+
+const cacheImages = (images) =>
+  images.map((image) => {
+    if (typeof image === 'string') {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
+
+const cacheFonts = (fonts) => fonts.map((font) => Font.loadAsync(font));
 
 export default function App() {
-  return (
-    <NativeBaseProvider>
-      <Center
-        _dark={{ bg: "blueGray.900" }}
-        _light={{ bg: "blueGray.50" }}
-        px={4}
-        flex={1}
-      >
-        <VStack space={5} alignItems="center">
-          <NativeBaseIcon />
-          <Heading size="lg">Welcome to NativeBase</Heading>
-          <HStack space={2} alignItems="center">
-            <Text>Edit</Text>
-            <Code>App.tsx</Code>
-            <Text>and save to reload.</Text>
-          </HStack>
-          <Link href="https://docs.nativebase.io" isExternal>
-            <Text color="primary.500" underline fontSize={"xl"}>
-              Learn NativeBase
-            </Text>
-          </Link>
-          <ToggleDarkMode />
-        </VStack>
-      </Center>
-    </NativeBaseProvider>
-  );
-}
+  const [isReady, setIsReady] = useState(false);
+  const handleFinish = () => setIsReady(true);
+  const loadAssets = async () => {
+    const images = [
+      require('./src/assets/login.jpeg'),
+      require('./src/assets/onboarding-img1.png'),
+      require('./src/assets/onboarding-img2.png'),
+      require('./src/assets/onboarding-img3.png'),
+    ];
 
-// Color Switch Component
-function ToggleDarkMode() {
-  const { colorMode, toggleColorMode } = useColorMode();
-  return (
-    <HStack space={2} alignItems="center">
-      <Text>Dark</Text>
-      <Switch
-        isChecked={colorMode === "light" ? true : false}
-        onToggle={toggleColorMode}
-        aria-label={
-          colorMode === "light" ? "switch to dark mode" : "switch to light mode"
-        }
+    const fonts = [
+      {
+        Courier: CourierPrime_400Regular,
+      },
+    ];
+
+    const imagePromises = cacheImages(images);
+    const fontPromises = cacheFonts(fonts);
+    Promise.all([...fontPromises, ...imagePromises]);
+  };
+
+  if (!isReady) {
+    return (
+      <AppLoading
+        onError={console.error}
+        onFinish={handleFinish}
+        startAsync={loadAssets}
       />
-      <Text>Light</Text>
-    </HStack>
+    );
+  }
+  return (
+    <I18nextProvider i18n={i18next}>
+      <AppThemeProvider>
+        <QueryProvider>
+          <MainNavigation />
+        </QueryProvider>
+      </AppThemeProvider>
+    </I18nextProvider>
   );
 }
