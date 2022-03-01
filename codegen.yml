@@ -8,9 +8,8 @@ generates:
       - 'typescript-operations'
       - 'typescript-react-query'
     config:
-      config:
-        fetcher:
-          endpoint: 'http://localhost:1337/graphql'
+      fetcher: fetch
+      addInfiniteQuery: true
   ./graphql.schema.json:
     plugins:
       - 'introspection'

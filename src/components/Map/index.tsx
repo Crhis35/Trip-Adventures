@@ -5,7 +5,6 @@ import MapView, {
   Callout,
   MapEvent,
 } from 'react-native-maps';
-import { mapDarkStyle, mapStandardStyle } from './utils';
 import {
   Box,
   Icon,
@@ -25,6 +24,7 @@ import {
   Text,
 } from 'react-native';
 import CustomCallout from './components/CustomCallout';
+import { mapDarkStyle, mapStandardStyle } from '../../shared/helpers/map';
 
 const markers = [
   {
@@ -136,12 +136,10 @@ const Map = () => {
         provider={PROVIDER_GOOGLE}
         customMapStyle={colorMode === 'dark' ? mapDarkStyle : mapStandardStyle}
         region={{
-          // latitude: location.latitude,
-          // longitude: location.longitude,
-          latitude: 22.6293867,
-          longitude: 88.4354486,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.04864195044303443,
+          longitudeDelta: 0.040142817690068,
         }}
       >
         {markers.map((marker, index) => {

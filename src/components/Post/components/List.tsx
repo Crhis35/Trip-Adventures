@@ -1,11 +1,10 @@
 import React from 'react';
 import {
-  Heading,
+  Text,
   Center,
   Box,
   Icon,
   Divider,
-  Text,
   AspectRatio,
   Stack,
   HStack,
@@ -13,42 +12,72 @@ import {
   FlatList,
   VStack,
   Skeleton,
-  ScrollView,
+  Heading,
+  Spinner,
 } from 'native-base';
 import SearchBar from '../../SearchBar';
-import { usePostQuery } from '../../../generated/graphql';
+import { useInfinitePostQuery } from '../../../generated/graphql';
 import { useAppSelector } from '../../../store/hooks';
 import { BaseUrl } from '../../../shared/constants';
-import Header from '../../../shared/Header/index';
 import dayjs from 'dayjs';
+import Carousel from 'react-native-snap-carousel';
+import { Dimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
-{
-  /* <Image
-source={{
-  uri: `${BaseUrl.replace('/graphql', '')}${
-    item.attributes?.images?.data[0].attributes?.url
-  }`,
-}}
-size="100%"
-alt="image base"
-/> */
-}
+const { width } = Dimensions.get('window');
+const WIDTH = width;
 
 const PostList = () => {
   const {
     currentUser: { jwt },
   } = useAppSelector((state) => state.user);
-
-  const { data: postList, isLoading } = usePostQuery({
-    endpoint: BaseUrl,
-    fetchParams: {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwt}`,
+  const { t } = useTranslation('common');
+  const {
+    data: postList,
+    isLoading,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfinitePostQuery(
+    {
+      endpoint: BaseUrl,
+      fetchParams: {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${jwt}`,
+        },
       },
     },
-  });
-  const posts = postList?.posts?.data;
+    'pagination',
+    {
+      pagination: {
+        pageSize: 2,
+      },
+    },
+    {
+      onError: (error) => {
+        console.error(error);
+      },
+      keepPreviousData: true,
+      getNextPageParam: (lastPage) => {
+        if (lastPage?.posts?.meta.pagination) {
+          const page = lastPage.posts.meta.pagination.page;
+          const total = lastPage.posts.meta.pagination.total;
+          const pageSize = lastPage.posts.meta.pagination.pageSize;
+
+          if (page * pageSize < total) {
+            return {
+              pagination: {
+                page: page + 1,
+                pageSize: 2,
+              },
+            };
+          }
+        }
+      },
+    }
+  );
+
+  const posts = postList?.pages.map(({ posts }) => posts?.data).flat();
   if (isLoading)
     return (
       <Center w="100%" h="100%">
@@ -89,63 +118,75 @@ const PostList = () => {
       </Center>
     );
 
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return <Divider m="10" />;
+    return (
+      <HStack marginY="10" space={2} justifyContent="center">
+        <Spinner accessibilityLabel="Loading posts" />
+        <Heading color="primary.500" fontSize="md">
+          {t('states.loading')}
+        </Heading>
+      </HStack>
+    );
+  };
+
   return (
     <Center w="100%">
       {posts && posts.length > 0 ? (
         <FlatList
-          maxW="350"
-          w="100%"
+          w="85%"
           data={posts}
-          ListFooterComponent={<Divider m="10" />}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={SearchBar}
           keyExtractor={(_, idx) => `post-${idx}`}
           ItemSeparatorComponent={() => <Divider my="5" />}
+          ListFooterComponent={renderFooter}
+          onEndReached={() => fetchNextPage()}
+          onEndReachedThreshold={0}
           renderItem={({ item }) => (
             <Box
-              shadow="2"
+              shadow="1"
               rounded="lg"
-              _light={{ bg: 'coolGray.50' }}
+              _light={{
+                bg: 'muted.100',
+              }}
               _dark={{ bg: 'gray.700' }}
             >
               <AspectRatio w="100%" ratio={1.5}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={true}
-                  scrollEventThrottle={200}
-                  decelerationRate="fast"
-                  pagingEnabled
-                  snapToAlignment="center"
-                  _contentContainerStyle={{
-                    w: '100%',
+                <Carousel
+                  data={item?.attributes?.images?.data || []}
+                  contentContainerStyle={{
+                    width: '100%',
                   }}
-                >
-                  {item.attributes?.images?.data.map((image, idx) => (
+                  sliderWidth={WIDTH}
+                  itemWidth={WIDTH}
+                  showsHorizontalScrollIndicator
+                  shouldRasterizeIOS
+                  renderItem={({ item: image }) => (
                     <Image
                       source={{
                         uri: `${BaseUrl.replace('/graphql', '')}${
                           image?.attributes?.url
                         }`,
                       }}
-                      key={`images-${idx}`}
                       size="100%"
                       alt="image base"
                     />
-                  ))}
-                </ScrollView>
+                  )}
+                />
               </AspectRatio>
               <Text bold position="absolute" color="coolGray.50" top="0" m="4">
                 NEWS
               </Text>
               <Stack space="2" p="4">
                 <Text color="gray.400">
-                  {dayjs(item.attributes?.createdAt).format('MMMM D, YYYY')}
+                  {dayjs(item?.attributes?.createdAt).format('MMMM D, YYYY')}
                 </Text>
                 <Heading size={['md', 'lg', 'md']} fontWeight="medium">
-                  {item.attributes?.title}
+                  {item?.attributes?.title}
                 </Heading>
                 <Text isTruncated noOfLines={4}>
-                  {item.attributes?.description}
+                  {item?.attributes?.description}
                 </Text>
               </Stack>
               <HStack space="3" px="4" pb="4">
@@ -165,7 +206,7 @@ const PostList = () => {
           )}
         />
       ) : (
-        <Header>No post yet</Header>
+        <Text>No post yet</Text>
       )}
     </Center>
   );

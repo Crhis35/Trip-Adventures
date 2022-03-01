@@ -4,8 +4,6 @@ import { Text, Icon, Box, StatusBar, HStack, IconButton } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const Header = (props: any) => {
-  console.log(props);
-
   return (
     <>
       <Box safeAreaTop bg="#6200ee" />

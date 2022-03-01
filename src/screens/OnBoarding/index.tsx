@@ -50,9 +50,9 @@ const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
     initialValue: false,
   });
 
-  const onComplete = () => {
+  const onComplete = async () => {
+    await setValue(true);
     navigation.navigate('Home');
-    setValue(true);
   };
   return (
     <Onboarding

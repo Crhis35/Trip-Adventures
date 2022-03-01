@@ -1,17 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  UsersPermissionsUser,
-  UsersPermissionsMe,
-  UsersPermissionsLoginPayload,
-} from '../../../generated/graphql';
+
+import { User } from '../../../utils/types/user';
 
 export interface UserState {
-  user:
-    | UsersPermissionsUser
-    | UsersPermissionsMe
-    | null
-    | undefined
-    | UsersPermissionsLoginPayload;
+  user: User | null | undefined;
   jwt: string | undefined | null;
 }
 

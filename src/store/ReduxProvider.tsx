@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 
 import { Provider } from 'react-redux';
-import Loading from '../shared/Loading/index';
+import Loading from '../shared/components/Loading/index';
 import { PersistGate } from 'redux-persist/integration/react';
 import store, { persistor } from '.';
 

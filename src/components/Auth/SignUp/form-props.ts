@@ -1,6 +1,11 @@
 import * as Yup from 'yup';
+import { UsersPermissionsRegisterInput } from '../../../generated/graphql';
 
-export const initialValues = {
+export interface FormProps extends UsersPermissionsRegisterInput {
+  confirmedPassword: string;
+}
+
+export const initialValues: FormProps = {
   username: '',
   email: '',
   password: '',

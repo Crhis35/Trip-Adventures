@@ -33,9 +33,12 @@ const Sidebar = ({ state, navigation }: DrawerContentComponentProps) => {
   const handlePressBackButton = useCallback(() => {
     navigation.closeDrawer();
   }, [navigation]);
-  const handlePressMenuHome = useCallback(() => {
-    navigation.navigate('Home');
-  }, [navigation]);
+  const handlePressMenu = useCallback(
+    (route: string) => {
+      navigation.navigate(route);
+    },
+    [navigation]
+  );
 
   const logOut = useCallback(() => {
     dispatch(removeUser());
@@ -43,7 +46,7 @@ const Sidebar = ({ state, navigation }: DrawerContentComponentProps) => {
 
   const translateTo = i18n.language === 'en' ? 'es' : 'en';
 
-  const AvalaibleLanguages = [
+  const AvailableLanguages = [
     {
       label: 'English',
       value: 'en',
@@ -53,7 +56,6 @@ const Sidebar = ({ state, navigation }: DrawerContentComponentProps) => {
       value: 'es',
     },
   ];
-
   return (
     <Box
       bg={useColorModeValue('white', 'lightBlue.600')}
@@ -85,15 +87,23 @@ const Sidebar = ({ state, navigation }: DrawerContentComponentProps) => {
           borderWidth={3}
         />
         <Heading mb={4} size="xl">
-          {currentUser?.username}
+          {currentUser?.attributes?.username}
         </Heading>
         <MenuButton
           active={currentRoute === 'Home'}
-          onPress={handlePressMenuHome}
+          onPress={() => handlePressMenu('Home')}
           icon="home"
           bg={useColorModeValue('blue.500', 'darkBlue.800')}
         >
           {t('settings_page.home')}
+        </MenuButton>
+        <MenuButton
+          active={currentRoute === 'Place'}
+          onPress={() => handlePressMenu('Place')}
+          icon="book-open"
+          bg={useColorModeValue('blue.500', 'darkBlue.800')}
+        >
+          {t('settings_page.place')}
         </MenuButton>
       </VStack>
       <Center>
@@ -110,7 +120,7 @@ const Sidebar = ({ state, navigation }: DrawerContentComponentProps) => {
           mb={1}
           onValueChange={() => i18n.changeLanguage(translateTo)}
         >
-          {AvalaibleLanguages.map((language, idx) => (
+          {AvailableLanguages.map((language, idx) => (
             <Select.Item {...language} key={`language-${idx}`} />
           ))}
         </Select>

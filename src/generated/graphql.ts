@@ -1,4 +1,4 @@
-import { useMutation, UseMutationOptions, useQuery, UseQueryOptions } from 'react-query';
+import { useMutation, UseMutationOptions, useQuery, UseQueryOptions, useInfiniteQuery, UseInfiniteQueryOptions, QueryFunctionContext } from 'react-query';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -68,17 +68,9 @@ export type Category = {
   __typename?: 'Category';
   createdAt?: Maybe<Scalars['DateTime']>;
   name: Scalars['String'];
-  places?: Maybe<PlaceRelationResponseCollection>;
+  place?: Maybe<PlaceEntityResponse>;
   publishedAt?: Maybe<Scalars['DateTime']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-export type CategoryPlacesArgs = {
-  filters?: InputMaybe<PlaceFiltersInput>;
-  pagination?: InputMaybe<PaginationArg>;
-  publicationState?: InputMaybe<PublicationState>;
-  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
 
 export type CategoryEntity = {
@@ -105,20 +97,15 @@ export type CategoryFiltersInput = {
   name?: InputMaybe<StringFilterInput>;
   not?: InputMaybe<CategoryFiltersInput>;
   or?: InputMaybe<Array<InputMaybe<CategoryFiltersInput>>>;
-  places?: InputMaybe<PlaceFiltersInput>;
+  place?: InputMaybe<PlaceFiltersInput>;
   publishedAt?: InputMaybe<DateTimeFilterInput>;
   updatedAt?: InputMaybe<DateTimeFilterInput>;
 };
 
 export type CategoryInput = {
   name?: InputMaybe<Scalars['String']>;
-  places?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  place?: InputMaybe<Scalars['ID']>;
   publishedAt?: InputMaybe<Scalars['DateTime']>;
-};
-
-export type CategoryRelationResponseCollection = {
-  __typename?: 'CategoryRelationResponseCollection';
-  data: Array<CategoryEntity>;
 };
 
 export type ComponentLocationLocations = {
@@ -215,7 +202,7 @@ export type FloatFilterInput = {
   startsWith?: InputMaybe<Scalars['Float']>;
 };
 
-export type GenericMorph = Category | ComponentLocationLocations | ComponentSocialSocialMedia | I18NLocale | Place | Post | Profile | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | UsersPermissionsUser;
+export type GenericMorph = Category | ComponentLocationLocations | ComponentSocialSocialMedia | I18NLocale | Place | Post | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | UsersPermissionsUser;
 
 export type I18NLocale = {
   __typename?: 'I18NLocale';
@@ -322,13 +309,17 @@ export type JsonFilterInput = {
   startsWith?: InputMaybe<Scalars['JSON']>;
 };
 
+export type LocationInput = {
+  lat: Scalars['Float'];
+  lng: Scalars['Float'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createCategory?: Maybe<CategoryEntityResponse>;
   createPlace?: Maybe<PlaceEntityResponse>;
   createPlaceLocalization?: Maybe<PlaceEntityResponse>;
   createPost?: Maybe<PostEntityResponse>;
-  createProfile?: Maybe<ProfileEntityResponse>;
   createUploadFile?: Maybe<UploadFileEntityResponse>;
   /** Create a new role */
   createUsersPermissionsRole?: Maybe<UsersPermissionsCreateRolePayload>;
@@ -337,7 +328,6 @@ export type Mutation = {
   deleteCategory?: Maybe<CategoryEntityResponse>;
   deletePlace?: Maybe<PlaceEntityResponse>;
   deletePost?: Maybe<PostEntityResponse>;
-  deleteProfile?: Maybe<ProfileEntityResponse>;
   deleteUploadFile?: Maybe<UploadFileEntityResponse>;
   /** Delete an existing role */
   deleteUsersPermissionsRole?: Maybe<UsersPermissionsDeleteRolePayload>;
@@ -358,7 +348,6 @@ export type Mutation = {
   updateFileInfo: UploadFileEntityResponse;
   updatePlace?: Maybe<PlaceEntityResponse>;
   updatePost?: Maybe<PostEntityResponse>;
-  updateProfile?: Maybe<ProfileEntityResponse>;
   updateUploadFile?: Maybe<UploadFileEntityResponse>;
   /** Update an existing role */
   updateUsersPermissionsRole?: Maybe<UsersPermissionsUpdateRolePayload>;
@@ -391,11 +380,6 @@ export type MutationCreatePostArgs = {
 };
 
 
-export type MutationCreateProfileArgs = {
-  data: ProfileInput;
-};
-
-
 export type MutationCreateUploadFileArgs = {
   data: UploadFileInput;
 };
@@ -423,11 +407,6 @@ export type MutationDeletePlaceArgs = {
 
 
 export type MutationDeletePostArgs = {
-  id: Scalars['ID'];
-};
-
-
-export type MutationDeleteProfileArgs = {
   id: Scalars['ID'];
 };
 
@@ -512,12 +491,6 @@ export type MutationUpdatePostArgs = {
 };
 
 
-export type MutationUpdateProfileArgs = {
-  data: ProfileInput;
-  id: Scalars['ID'];
-};
-
-
 export type MutationUpdateUploadFileArgs = {
   data: UploadFileInput;
   id: Scalars['ID'];
@@ -561,25 +534,19 @@ export type PaginationArg = {
 
 export type Place = {
   __typename?: 'Place';
-  categories?: Maybe<CategoryRelationResponseCollection>;
+  category?: Maybe<CategoryEntityResponse>;
   createdAt?: Maybe<Scalars['DateTime']>;
   description: Scalars['String'];
   locale?: Maybe<Scalars['String']>;
   localizations?: Maybe<PlaceRelationResponseCollection>;
   locations?: Maybe<Array<Maybe<ComponentLocationLocations>>>;
   name: Scalars['String'];
+  networks?: Maybe<Array<Maybe<ComponentSocialSocialMedia>>>;
   photos?: Maybe<UploadFileRelationResponseCollection>;
-  profile?: Maybe<ProfileEntityResponse>;
   publishedAt?: Maybe<Scalars['DateTime']>;
+  tags?: Maybe<Scalars['JSON']>;
   updatedAt?: Maybe<Scalars['DateTime']>;
-};
-
-
-export type PlaceCategoriesArgs = {
-  filters?: InputMaybe<CategoryFiltersInput>;
-  pagination?: InputMaybe<PaginationArg>;
-  publicationState?: InputMaybe<PublicationState>;
-  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  user?: Maybe<UsersPermissionsUserEntityResponse>;
 };
 
 
@@ -593,6 +560,13 @@ export type PlaceLocalizationsArgs = {
 
 export type PlaceLocationsArgs = {
   filters?: InputMaybe<ComponentLocationLocationsFiltersInput>;
+  pagination?: InputMaybe<PaginationArg>;
+  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+};
+
+
+export type PlaceNetworksArgs = {
+  filters?: InputMaybe<ComponentSocialSocialMediaFiltersInput>;
   pagination?: InputMaybe<PaginationArg>;
   sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
 };
@@ -623,7 +597,7 @@ export type PlaceEntityResponseCollection = {
 
 export type PlaceFiltersInput = {
   and?: InputMaybe<Array<InputMaybe<PlaceFiltersInput>>>;
-  categories?: InputMaybe<CategoryFiltersInput>;
+  category?: InputMaybe<CategoryFiltersInput>;
   createdAt?: InputMaybe<DateTimeFilterInput>;
   description?: InputMaybe<StringFilterInput>;
   id?: InputMaybe<IdFilterInput>;
@@ -632,19 +606,22 @@ export type PlaceFiltersInput = {
   name?: InputMaybe<StringFilterInput>;
   not?: InputMaybe<PlaceFiltersInput>;
   or?: InputMaybe<Array<InputMaybe<PlaceFiltersInput>>>;
-  profile?: InputMaybe<ProfileFiltersInput>;
   publishedAt?: InputMaybe<DateTimeFilterInput>;
+  tags?: InputMaybe<JsonFilterInput>;
   updatedAt?: InputMaybe<DateTimeFilterInput>;
+  user?: InputMaybe<UsersPermissionsUserFiltersInput>;
 };
 
 export type PlaceInput = {
-  categories?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
+  category?: InputMaybe<Scalars['ID']>;
   description?: InputMaybe<Scalars['String']>;
   locations?: InputMaybe<Array<InputMaybe<ComponentLocationLocationsInput>>>;
   name?: InputMaybe<Scalars['String']>;
+  networks?: InputMaybe<Array<InputMaybe<ComponentSocialSocialMediaInput>>>;
   photos?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  profile?: InputMaybe<Scalars['ID']>;
   publishedAt?: InputMaybe<Scalars['DateTime']>;
+  tags?: InputMaybe<Scalars['JSON']>;
+  user?: InputMaybe<Scalars['ID']>;
 };
 
 export type PlaceRelationResponseCollection = {
@@ -657,7 +634,6 @@ export type Post = {
   createdAt?: Maybe<Scalars['DateTime']>;
   description?: Maybe<Scalars['String']>;
   images?: Maybe<UploadFileRelationResponseCollection>;
-  profile?: Maybe<ProfileEntityResponse>;
   publishedAt?: Maybe<Scalars['DateTime']>;
   title: Scalars['String'];
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -694,7 +670,6 @@ export type PostFiltersInput = {
   id?: InputMaybe<IdFilterInput>;
   not?: InputMaybe<PostFiltersInput>;
   or?: InputMaybe<Array<InputMaybe<PostFiltersInput>>>;
-  profile?: InputMaybe<ProfileFiltersInput>;
   publishedAt?: InputMaybe<DateTimeFilterInput>;
   title?: InputMaybe<StringFilterInput>;
   updatedAt?: InputMaybe<DateTimeFilterInput>;
@@ -703,80 +678,8 @@ export type PostFiltersInput = {
 export type PostInput = {
   description?: InputMaybe<Scalars['String']>;
   images?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  profile?: InputMaybe<Scalars['ID']>;
   publishedAt?: InputMaybe<Scalars['DateTime']>;
   title?: InputMaybe<Scalars['String']>;
-};
-
-export type PostRelationResponseCollection = {
-  __typename?: 'PostRelationResponseCollection';
-  data: Array<PostEntity>;
-};
-
-export type Profile = {
-  __typename?: 'Profile';
-  createdAt?: Maybe<Scalars['DateTime']>;
-  networks?: Maybe<Array<Maybe<ComponentSocialSocialMedia>>>;
-  photo?: Maybe<UploadFileEntityResponse>;
-  place?: Maybe<PlaceEntityResponse>;
-  posts?: Maybe<PostRelationResponseCollection>;
-  publishedAt?: Maybe<Scalars['DateTime']>;
-  updatedAt?: Maybe<Scalars['DateTime']>;
-  user?: Maybe<UsersPermissionsUserEntityResponse>;
-};
-
-
-export type ProfileNetworksArgs = {
-  filters?: InputMaybe<ComponentSocialSocialMediaFiltersInput>;
-  pagination?: InputMaybe<PaginationArg>;
-  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-};
-
-
-export type ProfilePostsArgs = {
-  filters?: InputMaybe<PostFiltersInput>;
-  pagination?: InputMaybe<PaginationArg>;
-  publicationState?: InputMaybe<PublicationState>;
-  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-};
-
-export type ProfileEntity = {
-  __typename?: 'ProfileEntity';
-  attributes?: Maybe<Profile>;
-  id?: Maybe<Scalars['ID']>;
-};
-
-export type ProfileEntityResponse = {
-  __typename?: 'ProfileEntityResponse';
-  data?: Maybe<ProfileEntity>;
-};
-
-export type ProfileEntityResponseCollection = {
-  __typename?: 'ProfileEntityResponseCollection';
-  data: Array<ProfileEntity>;
-  meta: ResponseCollectionMeta;
-};
-
-export type ProfileFiltersInput = {
-  and?: InputMaybe<Array<InputMaybe<ProfileFiltersInput>>>;
-  createdAt?: InputMaybe<DateTimeFilterInput>;
-  id?: InputMaybe<IdFilterInput>;
-  not?: InputMaybe<ProfileFiltersInput>;
-  or?: InputMaybe<Array<InputMaybe<ProfileFiltersInput>>>;
-  place?: InputMaybe<PlaceFiltersInput>;
-  posts?: InputMaybe<PostFiltersInput>;
-  publishedAt?: InputMaybe<DateTimeFilterInput>;
-  updatedAt?: InputMaybe<DateTimeFilterInput>;
-  user?: InputMaybe<UsersPermissionsUserFiltersInput>;
-};
-
-export type ProfileInput = {
-  networks?: InputMaybe<Array<InputMaybe<ComponentSocialSocialMediaInput>>>;
-  photo?: InputMaybe<Scalars['ID']>;
-  place?: InputMaybe<Scalars['ID']>;
-  posts?: InputMaybe<Array<InputMaybe<Scalars['ID']>>>;
-  publishedAt?: InputMaybe<Scalars['DateTime']>;
-  user?: InputMaybe<Scalars['ID']>;
 };
 
 export enum PublicationState {
@@ -791,12 +694,11 @@ export type Query = {
   i18NLocale?: Maybe<I18NLocaleEntityResponse>;
   i18NLocales?: Maybe<I18NLocaleEntityResponseCollection>;
   me?: Maybe<UsersPermissionsMe>;
+  nearestPlaces: Scalars['String'];
   place?: Maybe<PlaceEntityResponse>;
   places?: Maybe<PlaceEntityResponseCollection>;
   post?: Maybe<PostEntityResponse>;
   posts?: Maybe<PostEntityResponseCollection>;
-  profile?: Maybe<ProfileEntityResponse>;
-  profiles?: Maybe<ProfileEntityResponseCollection>;
   uploadFile?: Maybe<UploadFileEntityResponse>;
   uploadFiles?: Maybe<UploadFileEntityResponseCollection>;
   usersPermissionsRole?: Maybe<UsersPermissionsRoleEntityResponse>;
@@ -831,6 +733,12 @@ export type QueryI18NLocalesArgs = {
 };
 
 
+export type QueryNearestPlacesArgs = {
+  input: LocationInput;
+  pagination?: InputMaybe<PaginationArg>;
+};
+
+
 export type QueryPlaceArgs = {
   id?: InputMaybe<Scalars['ID']>;
   locale?: InputMaybe<Scalars['I18NLocaleCode']>;
@@ -853,19 +761,6 @@ export type QueryPostArgs = {
 
 export type QueryPostsArgs = {
   filters?: InputMaybe<PostFiltersInput>;
-  pagination?: InputMaybe<PaginationArg>;
-  publicationState?: InputMaybe<PublicationState>;
-  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
-};
-
-
-export type QueryProfileArgs = {
-  id?: InputMaybe<Scalars['ID']>;
-};
-
-
-export type QueryProfilesArgs = {
-  filters?: InputMaybe<ProfileFiltersInput>;
   pagination?: InputMaybe<PaginationArg>;
   publicationState?: InputMaybe<PublicationState>;
   sort?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
@@ -1174,7 +1069,8 @@ export type UsersPermissionsUser = {
   confirmed?: Maybe<Scalars['Boolean']>;
   createdAt?: Maybe<Scalars['DateTime']>;
   email: Scalars['String'];
-  profile?: Maybe<ProfileEntityResponse>;
+  photo?: Maybe<UploadFileEntityResponse>;
+  place?: Maybe<PlaceEntityResponse>;
   provider?: Maybe<Scalars['String']>;
   role?: Maybe<UsersPermissionsRoleEntityResponse>;
   updatedAt?: Maybe<Scalars['DateTime']>;
@@ -1209,7 +1105,7 @@ export type UsersPermissionsUserFiltersInput = {
   not?: InputMaybe<UsersPermissionsUserFiltersInput>;
   or?: InputMaybe<Array<InputMaybe<UsersPermissionsUserFiltersInput>>>;
   password?: InputMaybe<StringFilterInput>;
-  profile?: InputMaybe<ProfileFiltersInput>;
+  place?: InputMaybe<PlaceFiltersInput>;
   provider?: InputMaybe<StringFilterInput>;
   resetPasswordToken?: InputMaybe<StringFilterInput>;
   role?: InputMaybe<UsersPermissionsRoleFiltersInput>;
@@ -1223,7 +1119,8 @@ export type UsersPermissionsUserInput = {
   confirmed?: InputMaybe<Scalars['Boolean']>;
   email?: InputMaybe<Scalars['String']>;
   password?: InputMaybe<Scalars['String']>;
-  profile?: InputMaybe<Scalars['ID']>;
+  photo?: InputMaybe<Scalars['ID']>;
+  place?: InputMaybe<Scalars['ID']>;
   provider?: InputMaybe<Scalars['String']>;
   resetPasswordToken?: InputMaybe<Scalars['String']>;
   role?: InputMaybe<Scalars['ID']>;
@@ -1261,6 +1158,22 @@ export type PostQueryVariables = Exact<{
 
 
 export type PostQuery = { __typename?: 'Query', posts?: { __typename?: 'PostEntityResponseCollection', meta: { __typename?: 'ResponseCollectionMeta', pagination: { __typename?: 'Pagination', total: number, page: number, pageSize: number, pageCount: number } }, data: Array<{ __typename?: 'PostEntity', id?: string | null, attributes?: { __typename?: 'Post', description?: string | null, title: string, createdAt?: any | null, images?: { __typename?: 'UploadFileRelationResponseCollection', data: Array<{ __typename?: 'UploadFileEntity', attributes?: { __typename?: 'UploadFile', url: string } | null }> } | null } | null }> } | null };
+
+export type MutationMutationVariables = Exact<{
+  data: PlaceInput;
+}>;
+
+
+export type MutationMutation = { __typename?: 'Mutation', createPlace?: { __typename?: 'PlaceEntityResponse', data?: { __typename?: 'PlaceEntity', attributes?: { __typename?: 'Place', description: string, name: string, photos?: { __typename?: 'UploadFileRelationResponseCollection', data: Array<{ __typename?: 'UploadFileEntity', attributes?: { __typename?: 'UploadFile', url: string } | null }> } | null, category?: { __typename?: 'CategoryEntityResponse', data?: { __typename?: 'CategoryEntity', id?: string | null, attributes?: { __typename?: 'Category', name: string } | null } | null } | null, locations?: Array<{ __typename?: 'ComponentLocationLocations', longitude: number, latitude: number } | null> | null, networks?: Array<{ __typename?: 'ComponentSocialSocialMedia', networkType: string, value: string } | null> | null } | null } | null } | null };
+
+export type UsersPermissionsUserQueryVariables = Exact<{
+  pagination?: InputMaybe<PaginationArg>;
+  sort?: InputMaybe<Array<InputMaybe<Scalars['String']>> | InputMaybe<Scalars['String']>>;
+  usersPermissionsUserId?: InputMaybe<Scalars['ID']>;
+}>;
+
+
+export type UsersPermissionsUserQuery = { __typename?: 'Query', usersPermissionsUser?: { __typename?: 'UsersPermissionsUserEntityResponse', data?: { __typename?: 'UsersPermissionsUserEntity', id?: string | null, attributes?: { __typename?: 'UsersPermissionsUser', username: string, email: string, provider?: string | null, confirmed?: boolean | null, blocked?: boolean | null, place?: { __typename?: 'PlaceEntityResponse', data?: { __typename?: 'PlaceEntity', id?: string | null, attributes?: { __typename?: 'Place', description: string, name: string, photos?: { __typename?: 'UploadFileRelationResponseCollection', data: Array<{ __typename?: 'UploadFileEntity', attributes?: { __typename?: 'UploadFile', url: string } | null }> } | null, locations?: Array<{ __typename?: 'ComponentLocationLocations', longitude: number, latitude: number } | null> | null, networks?: Array<{ __typename?: 'ComponentSocialSocialMedia', networkType: string, value: string } | null> | null, category?: { __typename?: 'CategoryEntityResponse', data?: { __typename?: 'CategoryEntity', id?: string | null, attributes?: { __typename?: 'Category', name: string } | null } | null } | null } | null } | null } | null, photo?: { __typename?: 'UploadFileEntityResponse', data?: { __typename?: 'UploadFileEntity', attributes?: { __typename?: 'UploadFile', url: string } | null } | null } | null } | null } | null } | null };
 
 
 export const LoginDocument = `
@@ -1339,6 +1252,21 @@ export const useMeQuery = <
       fetcher<MeQuery, MeQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, MeDocument, variables),
       options
     );
+export const useInfiniteMeQuery = <
+      TData = MeQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      pageParamKey: keyof MeQueryVariables,
+      variables?: MeQueryVariables,
+      options?: UseQueryOptions<MeQuery, TError, TData>
+    ) =>
+    useInfiniteQuery<MeQuery, TError, TData>(
+      variables === undefined ? ['me.infinite'] : ['me.infinite', variables],
+      (metaData) => fetcher<MeQuery, MeQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, MeDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      options
+    );
+
 export const PostDocument = `
     query post($filters: PostFiltersInput, $pagination: PaginationArg) {
   posts(filters: $filters, pagination: $pagination) {
@@ -1379,5 +1307,149 @@ export const usePostQuery = <
     useQuery<PostQuery, TError, TData>(
       variables === undefined ? ['post'] : ['post', variables],
       fetcher<PostQuery, PostQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, PostDocument, variables),
+      options
+    );
+export const useInfinitePostQuery = <
+      TData = PostQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      pageParamKey: keyof PostQueryVariables,
+      variables?: PostQueryVariables,
+      options?: UseQueryOptions<PostQuery, TError, TData>
+    ) =>
+    useInfiniteQuery<PostQuery, TError, TData>(
+      variables === undefined ? ['post.infinite'] : ['post.infinite', variables],
+      (metaData) => fetcher<PostQuery, PostQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, PostDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      options
+    );
+
+export const MutationDocument = `
+    mutation Mutation($data: PlaceInput!) {
+  createPlace(data: $data) {
+    data {
+      attributes {
+        photos {
+          data {
+            attributes {
+              url
+            }
+          }
+        }
+        description
+        name
+        category {
+          data {
+            attributes {
+              name
+            }
+            id
+          }
+        }
+        locations {
+          longitude
+          latitude
+        }
+        networks {
+          networkType
+          value
+        }
+      }
+    }
+  }
+}
+    `;
+export const useMutationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      options?: UseMutationOptions<MutationMutation, TError, MutationMutationVariables, TContext>
+    ) =>
+    useMutation<MutationMutation, TError, MutationMutationVariables, TContext>(
+      ['Mutation'],
+      (variables?: MutationMutationVariables) => fetcher<MutationMutation, MutationMutationVariables>(dataSource.endpoint, dataSource.fetchParams || {}, MutationDocument, variables)(),
+      options
+    );
+export const UsersPermissionsUserDocument = `
+    query usersPermissionsUser($pagination: PaginationArg, $sort: [String], $usersPermissionsUserId: ID) {
+  usersPermissionsUser(id: $usersPermissionsUserId) {
+    data {
+      id
+      attributes {
+        username
+        email
+        provider
+        confirmed
+        place {
+          data {
+            attributes {
+              photos(pagination: $pagination, sort: $sort) {
+                data {
+                  attributes {
+                    url
+                  }
+                }
+              }
+              description
+              name
+              locations {
+                longitude
+                latitude
+              }
+              networks {
+                networkType
+                value
+              }
+              category {
+                data {
+                  id
+                  attributes {
+                    name
+                  }
+                }
+              }
+            }
+            id
+          }
+        }
+        blocked
+        photo {
+          data {
+            attributes {
+              url
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+export const useUsersPermissionsUserQuery = <
+      TData = UsersPermissionsUserQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      variables?: UsersPermissionsUserQueryVariables,
+      options?: UseQueryOptions<UsersPermissionsUserQuery, TError, TData>
+    ) =>
+    useQuery<UsersPermissionsUserQuery, TError, TData>(
+      variables === undefined ? ['usersPermissionsUser'] : ['usersPermissionsUser', variables],
+      fetcher<UsersPermissionsUserQuery, UsersPermissionsUserQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UsersPermissionsUserDocument, variables),
+      options
+    );
+export const useInfiniteUsersPermissionsUserQuery = <
+      TData = UsersPermissionsUserQuery,
+      TError = unknown
+    >(
+      dataSource: { endpoint: string, fetchParams?: RequestInit },
+      pageParamKey: keyof UsersPermissionsUserQueryVariables,
+      variables?: UsersPermissionsUserQueryVariables,
+      options?: UseQueryOptions<UsersPermissionsUserQuery, TError, TData>
+    ) =>
+    useInfiniteQuery<UsersPermissionsUserQuery, TError, TData>(
+      variables === undefined ? ['usersPermissionsUser.infinite'] : ['usersPermissionsUser.infinite', variables],
+      (metaData) => fetcher<UsersPermissionsUserQuery, UsersPermissionsUserQueryVariables>(dataSource.endpoint, dataSource.fetchParams || {}, UsersPermissionsUserDocument, {...variables, ...(metaData.pageParam ?? {})})(),
       options
     );

@@ -14,24 +14,25 @@ const MenuButton = ({ active, icon, children, ...props }: Props) => {
       size="lg"
       _light={{
         colorScheme: 'blue',
+        bg: active ? 'primary.500' : 'primary.50',
         _pressed: {
-          bg: 'primary.100',
+          bg: active ? 'primary.500' : 'primary.100',
         },
         _text: {
-          color: active ? 'blue.50' : 'blue.500',
+          color: active ? 'blue.50' : 'primary.500',
         },
       }}
       _dark={{
         colorScheme: 'darkBlue',
+        bg: active ? 'darkBlue.800' : undefined,
         _pressed: {
           bg: 'primary.600',
         },
         _text: {
-          color: active ? 'blue.50' : undefined,
+          color: active ? 'blue.50' : 'white',
         },
       }}
-      bg={active ? undefined : 'transparent'}
-      variant="solid"
+      variant={active ? 'solid' : 'outline'}
       justifyContent="flex-start"
       leftIcon={<Icon as={Feather} name={icon} size="sm" opacity={0.5} />}
       {...props}

@@ -1,19 +1,10 @@
 import { useAppSelector, useAppDispatch } from '../../../hooks';
 import { removeUser } from '..';
 import { useQueryClient } from 'react-query';
-import {
-  UsersPermissionsLoginPayload,
-  UsersPermissionsMe,
-  UsersPermissionsUser,
-} from '../../../../generated/graphql';
+import { User } from '../../../../utils/types/user';
 
 export function useUser(): {
-  user:
-    | UsersPermissionsUser
-    | UsersPermissionsMe
-    | UsersPermissionsLoginPayload
-    | null
-    | undefined;
+  user: User | null | undefined;
   removeCurrentUser: () => void;
 } {
   const { currentUser } = useAppSelector((state) => state.user);

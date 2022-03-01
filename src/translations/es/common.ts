@@ -27,9 +27,24 @@ export default {
   },
   settings_page: {
     home: 'Inicio',
+    place: 'Sitio',
     theme: {
       light: 'Claro',
       dark: 'Oscuro',
     },
+  },
+  site_page: {
+    form: {
+      title: 'Configura tu sitio',
+      name: 'Nombre',
+      locations: 'Ubicaciones',
+      description: 'Descripción',
+      photos: 'Fotos',
+      categories: 'Categorías',
+      networks: 'Redes',
+    },
+  },
+  states: {
+    loading: 'Cargando',
   },
 };

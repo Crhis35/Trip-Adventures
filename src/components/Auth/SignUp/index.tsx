@@ -11,15 +11,21 @@ import {
   VStack,
   WarningOutlineIcon,
   Text,
+  useToast,
 } from 'native-base';
 import { Controller, useForm } from 'react-hook-form';
-import { initialValues, validationSchema } from './form-props';
+import { FormProps, initialValues, validationSchema } from './form-props';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ErrorMessage } from '@hookform/error-message';
 import AuthScreen from '../../../screens/Auth/Auth';
 import { useTranslation } from 'react-i18next';
 
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
+import { useRegisterMutation } from '../../../generated/graphql';
+import { BaseUrl } from '../../../shared/constants';
+import { useAppDispatch } from '../../../store/hooks';
+import { setUser } from '../../../store/reducers/user';
+import Loading from '../../../shared/components/Loading';
 
 interface Props {
   navigation: NavigationProp<ParamListBase>;
@@ -29,12 +35,69 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
   const {
     control,
     formState: { errors, isValid },
+    handleSubmit,
   } = useForm({
     mode: 'all',
     defaultValues: initialValues,
     resolver: yupResolver(validationSchema),
   });
   const { t } = useTranslation('common');
+  const dispatch = useAppDispatch();
+  const toast = useToast();
+
+  const { mutate, isLoading } = useRegisterMutation(
+    {
+      endpoint: BaseUrl,
+      fetchParams: {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    },
+    {
+      onSuccess: ({ register }) => {
+        if (register) {
+          const data = {
+            jwt: register.jwt,
+            user: {
+              id: register.user.id,
+              username: register.user.username,
+              email: register.user.email,
+              blocked: register.user.blocked,
+              confirmed: register.user.confirmed,
+            },
+          };
+          dispatch(setUser(data));
+        }
+      },
+      onError: (error) => {
+        toast.closeAll();
+        const description =
+          error instanceof Error
+            ? error.toString().replace(/^Error:\s*/, '')
+            : 'error connecting to server';
+
+        toast.show({
+          title: 'Something went wrong',
+          status: 'error',
+          description,
+        });
+      },
+    }
+  );
+
+  const onSubmit = async (data: FormProps) => {
+    const input = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    };
+    await mutate({ input });
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <AuthScreen title={t('auth_page.title')}>
@@ -92,6 +155,7 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
                       type="text"
                       placeholder={t('auth_page.signUp.email')}
                       onChangeText={field.onChange}
+                      autoCapitalize="none"
                       {...field}
                     />
                   )}
@@ -177,7 +241,7 @@ const SignUp: React.FC<Props> = ({ navigation }) => {
                 <Button
                   isDisabled={!isValid}
                   mt="2"
-                  onPress={() => console.log('hello world')}
+                  onPress={() => handleSubmit(onSubmit)()}
                 >
                   {t('auth_page.signUp.submit')}
                 </Button>

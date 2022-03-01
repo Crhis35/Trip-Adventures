@@ -1,5 +1,3 @@
-import { UsersPermissionsUser } from '../../generated/graphql';
+import { UsersPermissionsUserEntity } from '../../generated/graphql';
 
-export interface User extends UsersPermissionsUser {
-  id: string | number;
-}
+export type User = Partial<UsersPermissionsUserEntity>;

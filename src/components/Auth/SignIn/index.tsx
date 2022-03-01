@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   Button,
@@ -21,7 +21,7 @@ import AuthScreen from '../../../screens/Auth/Auth';
 import { useTranslation } from 'react-i18next';
 
 import { NavigationProp, ParamListBase } from '@react-navigation/native';
-import Loading from '../../../shared/Loading';
+import Loading from '../../../shared/components/Loading';
 import { useAppDispatch } from '../../../store/hooks';
 import { setUser } from '../../../store/reducers/user';
 import {
@@ -95,7 +95,6 @@ const SignIn: React.FC<Props> = ({ navigation }) => {
   if (isLoading) {
     return <Loading />;
   }
-
   return (
     <AuthScreen title={t('auth_page.title')}>
       <VStack space={4} alignItems="center">

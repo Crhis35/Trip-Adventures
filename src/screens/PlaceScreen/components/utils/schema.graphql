@@ -1,0 +1,33 @@
+mutation Mutation($data: PlaceInput!) {
+  createPlace(data: $data) {
+    data {
+      attributes {
+        photos {
+          data {
+            attributes {
+              url
+            }
+          }
+        }
+        description
+        name
+        category {
+          data {
+            attributes {
+              name
+            }
+            id
+          }
+        }
+        locations {
+          longitude
+          latitude
+        }
+        networks {
+          networkType
+          value
+        }
+      }
+    }
+  }
+}

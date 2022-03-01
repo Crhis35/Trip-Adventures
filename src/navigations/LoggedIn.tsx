@@ -1,10 +1,11 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useAsyncStorage } from '../shared/hooks/storage';
-import Loading from '../shared/Loading';
+import Loading from '../shared/components/Loading';
 import OnboardingScreen from '../screens/OnBoarding';
 import Sidebar from '../components/Sidebar';
 import HomeScreen from '../screens/Home';
+import PlaceScreen from '../screens/PlaceScreen';
 
 const Drawer = createDrawerNavigator();
 
@@ -28,7 +29,7 @@ const LoggedInNavigator = () => {
       drawerContent={(props) => <Sidebar {...props} />}
       screenOptions={{
         drawerType: 'back',
-        overlayColor: '#00000000',
+        overlayColor: 'rgba(0,0,0,0.6)',
         headerShown: false,
       }}
     >
@@ -43,6 +44,7 @@ const LoggedInNavigator = () => {
         />
       )}
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Place" component={PlaceScreen} />
     </Drawer.Navigator>
   );
 };

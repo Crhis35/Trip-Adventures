@@ -1,5 +1,5 @@
 import React from 'react';
-import Masthead from '../../shared/MastHead';
+import Masthead from '../../shared/components/MastHead';
 import AuthStagger from './Stagger';
 import { Box, VStack, useColorModeValue } from 'native-base';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
