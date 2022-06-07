@@ -111,7 +111,7 @@ _To start using tags in git read the following [documentation](https://www.atlas
 Mention all those who helped build the project since its inception.
 
 - **Crhistian Caraballo**
-- **Jose Ortiz**
+- **Esteban Castilla**
 
 ## Expressions of Gratitude  🎁
 
